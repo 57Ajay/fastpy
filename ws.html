@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FastAPI WebSocket Chat</title>
+    <style>
+        #messages { list-style-type: none; margin: 0; padding: 0; height: 300px; overflow-y: scroll; border: 1px solid #ccc; margin-bottom: 10px; }
+        #messages li { padding: 5px 10px; }
+        #messages li:nth-child(odd) { background: #eee; }
+        #form { display: flex; }
+        #messageInput { flex-grow: 1; padding: 10px; }
+        button { padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>FastAPI WebSocket Chat</h1>
+    <label for="clientId">Client ID:</label>
+    <input type="text" id="clientId" autocomplete="off" value="User" />
+    <button onclick="connect()">Connect</button>
+    <hr>
+    <ul id="messages"></ul>
+    <form action="" id="form" onsubmit="sendMessage(event)">
+        <input type="text" id="messageInput" placeholder="Enter message" autocomplete="off" disabled/>
+        <button disabled>Send</button>
+    </form>
+
+    <script>
+        let ws = null;
+        const messages = document.getElementById('messages');
+        const form = document.getElementById('form');
+        const input = document.getElementById('messageInput');
+        const clientIdInput = document.getElementById('clientId');
+        const connectButton = document.querySelector('button[onclick="connect()"]');
+        const sendButton = form.querySelector('button');
+
+        function showMessage(message) {
+            const li = document.createElement('li');
+            li.textContent = message;
+            messages.appendChild(li);
+            messages.scrollTop = messages.scrollHeight; // Scroll to bottom
+        }
+
+        function connect() {
+            if (ws) {
+                ws.close();
+            }
+            const clientId = clientIdInput.value || "Anonymous";
+            // Adjust ws://localhost:8000 if your server runs elsewhere
+            const wsUrl = `ws://localhost:8000/ws/chat/${clientId}`;
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = function(event) {
+                showMessage(`Connected as ${clientId}`);
+                input.disabled = false;
+                sendButton.disabled = false;
+                connectButton.textContent = "Disconnect";
+                clientIdInput.disabled = true;
+            };
+
+            ws.onmessage = function(event) {
+                showMessage(event.data);
+            };
+
+            ws.onclose = function(event) {
+                showMessage("Connection closed.");
+                ws = null;
+                input.disabled = true;
+                sendButton.disabled = true;
+                connectButton.textContent = "Connect";
+                clientIdInput.disabled = false;
+            };
+
+            ws.onerror = function(event) {
+                showMessage("WebSocket error.");
+                console.error("WebSocket Error: ", event);
+            };
+        }
+
+
+        function sendMessage(event) {
+            event.preventDefault(); // Prevent form submission reloading page
+            if (ws && input.value) {
+                ws.send(input.value);
+                input.value = ''; // Clear input box
+            }
+        }
+
+         // Initial state
+         input.disabled = true;
+         sendButton.disabled = true;
+
+    </script>
+</body>
+</html>
