@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import items, auth, users, notifications
+from app.routers import items, auth, users, notifications, websockets
 from app.core.config import settings
 from app.db.session import engine, Base
 from contextlib import asynccontextmanager
@@ -41,6 +41,8 @@ app.include_router(items.router)
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(notifications.router)
+app.include_router(websockets.router)
+
 @app.get("/")
 async def read_root():
     print("Root endpoint accessed", settings)
