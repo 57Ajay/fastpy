@@ -1,0 +1,30 @@
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: fastapi_db_pg17
+    environment:
+      POSTGRES_USER: ajay
+      POSTGRES_PASSWORD: 57ajay
+      POSTGRES_DB: postgresDB
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  redis:
+    image: redis:7.4-alpine  # or keep your original: redis:8.0-rc1-alpine
+    container_name: fastapi_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: always
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
